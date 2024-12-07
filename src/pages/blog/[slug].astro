@@ -1,0 +1,52 @@
+---
+import { getCollection, getEntryBySlug } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import { Container } from "@/components/ui/container";
+import { formatDistance } from "date-fns";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+  }));
+}
+
+const { slug } = Astro.params;
+const post = await getEntryBySlug("blog", slug as string);
+
+if (!post) {
+  return Astro.redirect("/404");
+}
+
+const { Content } = await post.render();
+---
+
+<Layout title={`${post.data.title} | Modern Website`}>
+  <Container>
+    <article class="py-20 max-w-4xl mx-auto">
+      {
+        post.data.image && (
+          <img
+            src={post.data.image}
+            alt={post.data.title}
+            class="w-full h-[400px] object-cover rounded-lg mb-8"
+          />
+        )
+      }
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold mb-4">{post.data.title}</h1>
+        <div class="flex items-center gap-4 text-muted-foreground">
+          <span>{post.data.author}</span>
+          <span>•</span>
+          <time datetime={post.data.pubDate.toISOString()}>
+            {formatDistance(post.data.pubDate, new Date(), { addSuffix: true })}
+          </time>
+        </div>
+      </div>
+
+      <div class="prose prose-lg dark:prose-invert max-w-none">
+        <Content />
+      </div>
+    </article>
+  </Container>
+</Layout>

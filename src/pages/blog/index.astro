@@ -1,0 +1,51 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDistance } from "date-fns";
+import { Container } from "@/components/ui/container";
+
+const posts = await getCollection("blog");
+---
+
+<Layout title="Blog | Modern Website">
+  <Container>
+    <section class="py-20">
+      <h1 class="text-4xl font-bold mb-12">Our Blog</h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {
+          posts.map((post) => (
+            <a href={`/blog/${post.slug}`} class="block">
+              <Card className="h-full transition-transform hover:scale-[1.02]">
+                {post.data.image && (
+                  <img
+                    src={post.data.image}
+                    alt={post.data.title}
+                    class="w-full h-48 object-cover rounded-t-lg"
+                  />
+                )}
+                <CardHeader>
+                  <CardTitle>{post.data.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p class="text-muted-foreground mb-4">
+                    {post.data.description}
+                  </p>
+                  <div class="flex justify-between items-center text-sm text-muted-foreground">
+                    <span>{post.data.author}</span>
+                    <span>
+                      {formatDistance(post.data.pubDate, new Date(), {
+                        addSuffix: true,
+                      })}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+  </Container>
+</Layout>
